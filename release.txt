@@ -1,0 +1,8 @@
+v1.0.0-build101
+LearnInCreation Android app, version 1.0.0 (build 101).
+
+Download **LearnInCreation.apk** below on your Android phone and open it. If the phone asks, allow installing apps from your browser or Files app.
+
+The newest version is always at https://github.com/imcodemaster/learn-app-releases/releases/latest/download/LearnInCreation.apk
+
+Built from learn-app commit 8d4f201 for https://api.learnincreation.com.
