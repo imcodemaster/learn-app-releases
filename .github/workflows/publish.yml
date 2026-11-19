@@ -1,0 +1,52 @@
+# Publishes the LearnInCreation Android app.
+#
+# PUBLISH-APP.cmd (in the learn-app project on the PC) builds the signed APK,
+# uploads it to the "apk" branch of this repository and pushes a version tag
+# such as v1.0.0-build101. This workflow turns that tag into a release with
+# LearnInCreation.apk attached, so the newest version is always at:
+#   https://github.com/imcodemaster/learn-app-releases/releases/latest/download/LearnInCreation.apk
+#
+# It belongs at .github/workflows/publish.yml in learn-app-releases; learn-app
+# keeps a copy at scripts/github/publish.yml.
+name: Publish the app
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Get the uploaded APK
+        uses: actions/checkout@v6
+        with:
+          ref: apk
+          persist-credentials: false
+
+      - name: Check that it belongs to this version
+        run: |
+          if [ ! -s LearnInCreation.apk ]; then
+            echo "::error::LearnInCreation.apk is missing from the apk branch. Run PUBLISH-APP.cmd again."
+            exit 1
+          fi
+          uploaded="$(head -n 1 release.txt | tr -d '\r')"
+          if [ "$uploaded" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::The apk branch holds $uploaded, not $GITHUB_REF_NAME. Run PUBLISH-APP.cmd again."
+            exit 1
+          fi
+          tail -n +2 release.txt | tr -d '\r' > notes.md
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: LearnInCreation ${{ github.ref_name }}
+          body_path: notes.md
+          files: LearnInCreation.apk
+          fail_on_unmatched_files: true
+          make_latest: "true"
